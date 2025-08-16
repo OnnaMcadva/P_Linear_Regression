@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import csv
 import json
+import matplotlib.pyplot as plt
 
 DATA_FILE = "data.csv"
 THETA_FILE = "thetas.json"
@@ -11,10 +12,9 @@ ITERATIONS = 1000
 def load_data(filename):
     mileage = []
     price = []
-    with open(filename, "r") as f: # "r" reading only / with гарантирует корректное закрытие файла
-        reader = csv.DictReader(f) # *helpers.txt
+    with open(filename, "r") as f:
+        reader = csv.DictReader(f)
         for row in reader:
-            print(row['km'], row['price'])
             mileage.append(float(row["km"]))
             price.append(float(row["price"]))
     return mileage, price
@@ -50,23 +50,52 @@ def train(mileage, price, learning_rate, iterations):
 
     return theta0, theta1
 
-def save_model(theta0, theta1, mean_val, range_val, filename):
+def save_model(theta0, theta1, mean_mileage, range_mileage, filename):
     with open(filename, "w") as f:
         json.dump({
             "theta0": theta0,
             "theta1": theta1,
             "mean_mileage": mean_mileage,
-            "range_mileage": range_mileage,
+            "range_mileage": range_mileage
         }, f)
+
+def plot_data_and_regression(mileage, price, theta0, theta1, mean_m, range_m):
+    
+    plt.scatter(mileage, price, color="blue", label="Data")
+
+    min_m, max_m = min(mileage), max(mileage)
+    line_x = [min_m, max_m]
+    norm_x = [(x - mean_m) / range_m for x in line_x]
+    line_y = [estimate_price(xn, theta0, theta1) for xn in norm_x]
+    plt.plot(line_x, line_y, color="red", label="Regression line")
+
+    plt.xlabel("Mileage")
+    plt.ylabel("Price")
+    plt.title("Car Price Prediction")
+    plt.legend()
+    plt.show()
+
+def calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):
+    predictions = [
+        estimate_price((x - mean_m) / range_m, theta0, theta1)
+        for x in mileage
+    ]
+    mean_price = sum(price) / len(price)
+    ss_total = sum((y - mean_price) ** 2 for y in price)
+    ss_residual = sum((y - p) ** 2 for y, p in zip(price, predictions))
+    r2 = 1 - (ss_residual / ss_total)
+    return r2
 
 if __name__ == "__main__":
     mileage, price = load_data(DATA_FILE)
 
-    normalize_mileage, mean_m, range_m = normalize_feature(mileage)
+    normalized_mileage, mean_m, range_m = normalize_feature(mileage)
 
-    theta0, theta1 = train(normalize_mileage, price, LEARNING_RATE, ITERATIONS)
+    theta0, theta1 = train(normalized_mileage, price, LEARNING_RATE, ITERATIONS)
 
     save_model(theta0, theta1, mean_m, range_m, THETA_FILE)
 
     print(f"Training completed: theta0 = {theta0}, theta1 = {theta1}")
-    print(f"Mean mileage = {mean_m}, Range mileage = {range_m}")
+    print(f"Model R² score: {calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):.4f}")
+
+    plot_data_and_regression(mileage, price, theta0, theta1, mean_m, range_m)

@@ -9,6 +9,7 @@ THETA_FILE = "thetas.json"
 LEARNING_RATE = 0.1
 ITERATIONS = 1000
 
+
 def load_data(filename):
     mileage = []
     price = []
@@ -19,14 +20,17 @@ def load_data(filename):
             price.append(float(row["price"]))
     return mileage, price
 
+
 def normalize_feature(values):
     mean_val = sum(values) / len(values)
     range_val = max(values) - min(values)
     normalized = [(v - mean_val) / range_val for v in values]
     return normalized, mean_val, range_val
 
+
 def estimate_price(mileage, theta0, theta1):
     return theta0 + theta1 * mileage
+
 
 def train(mileage, price, learning_rate, iterations):
     m = len(mileage)
@@ -50,6 +54,7 @@ def train(mileage, price, learning_rate, iterations):
 
     return theta0, theta1
 
+
 def save_model(theta0, theta1, mean_mileage, range_mileage, filename):
     with open(filename, "w") as f:
         json.dump({
@@ -59,8 +64,9 @@ def save_model(theta0, theta1, mean_mileage, range_mileage, filename):
             "range_mileage": range_mileage
         }, f)
 
+
 def plot_data_and_regression(mileage, price, theta0, theta1, mean_m, range_m):
-    
+
     plt.scatter(mileage, price, color="blue", label="Data")
 
     min_m, max_m = min(mileage), max(mileage)
@@ -75,6 +81,7 @@ def plot_data_and_regression(mileage, price, theta0, theta1, mean_m, range_m):
     plt.legend()
     plt.show()
 
+
 def calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):
     predictions = [
         estimate_price((x - mean_m) / range_m, theta0, theta1)
@@ -86,16 +93,25 @@ def calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):
     r2 = 1 - (ss_residual / ss_total)
     return r2
 
+
 if __name__ == "__main__":
     mileage, price = load_data(DATA_FILE)
 
     normalized_mileage, mean_m, range_m = normalize_feature(mileage)
 
-    theta0, theta1 = train(normalized_mileage, price, LEARNING_RATE, ITERATIONS)
+    theta0, theta1 = train(
+        normalized_mileage,
+        price,
+        LEARNING_RATE,
+        ITERATIONS
+    )
 
     save_model(theta0, theta1, mean_m, range_m, THETA_FILE)
 
     print(f"Training completed: theta0 = {theta0}, theta1 = {theta1}")
-    print(f"Model R² score: {calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):.4f}")
+    print(
+        f"Model R² score: "
+        f"{calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):.4f}"
+    )
 
     plot_data_and_regression(mileage, price, theta0, theta1, mean_m, range_m)

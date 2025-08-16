@@ -50,4 +50,23 @@ def train(mileage, price, learning_rate, iterations):
 
     return theta0, theta1
 
-def save_model()
+def save_model(theta0, theta1, mean_val, range_val, filename):
+    with open(filename, "w") as f:
+        json.dump({
+            "theta0": theta0,
+            "theta1": theta1,
+            "mean_mileage": mean_mileage,
+            "range_mileage": range_mileage,
+        }, f)
+
+if __name__ == "__main__":
+    mileage, price = load_data(DATA_FILE)
+
+    normalize_mileage, mean_m, range_m = normalize_feature(mileage)
+
+    theta0, theta1 = train(normalize_mileage, price, LEARNING_RATE, ITERATIONS)
+
+    save_model(theta0, theta1, mean_m, range_m, THETA_FILE)
+
+    print(f"Training completed: theta0 = {theta0}, theta1 = {theta1}")
+    print(f"Mean mileage = {mean_m}, Range mileage = {range_m}")

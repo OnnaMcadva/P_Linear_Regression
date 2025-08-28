@@ -13,19 +13,54 @@ ITERATIONS = 1000
 def load_data(filename):
     mileage = []
     price = []
-    with open(filename, "r") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            mileage.append(float(row["km"]))
-            price.append(float(row["price"]))
-    return mileage, price
+    try:
+        with open(filename, "r") as f:
+            reader = csv.DictReader(f)
+            if not {"km", "price"}.issubset(reader.fieldnames):
+                raise ValueError(
+                    "File data.csv must contain columns 'km' and 'price'.")
+
+            for row in reader:
+                try:
+                    mileage.append(float(row["km"]))
+                    price.append(float(row["price"]))
+                except (ValueError, KeyError) as e:
+                    print(f"Skipped row with invalid data: {row}. Error: {e}")
+                    continue
+
+        if not mileage or not price:
+            raise ValueError("File *.csv is empty or contains no valid data.")
+
+        if len(mileage) < 2:
+            raise ValueError("Insufficient data in *.csv for model training.")
+
+        if any(p <= 0 for p in price):
+            raise ValueError("Prices in *.csv file must be positive.")
+
+        if any(m < 0 for m in mileage):
+            raise ValueError("Mileage in *.csv file cannot be negative.")
+
+        return mileage, price
+
+    except FileNotFoundError:
+        raise FileNotFoundError("File *.csv not found.")
+    except Exception as e:
+        raise ValueError(f"Error reading *.csv file: {str(e)}")
 
 
 def normalize_feature(values):
     mean_val = sum(values) / len(values)
     range_val = max(values) - min(values)
-    normalized = [(v - mean_val) / range_val for v in values]
+    if range_val == 0:
+        normalized = [0.0 for _ in values]
+        range_val = 1.0
+    else:
+        normalized = [(v - mean_val) / range_val for v in values]
     return normalized, mean_val, range_val
+
+
+def normalize(value, mean, range_val):
+    return 0.0 if range_val == 0 else (value - mean) / range_val
 
 
 def estimate_price(mileage, theta0, theta1):
@@ -56,12 +91,21 @@ def train(mileage, price, learning_rate, iterations):
 
 
 def save_model(theta0, theta1, mean_mileage, range_mileage, filename):
+    if range_mileage != 0:
+        theta1_raw = theta1 / range_mileage
+        theta0_raw = theta0 - theta1 * mean_mileage / range_mileage
+    else:
+        theta1_raw = 0.0
+        theta0_raw = theta0
+
     with open(filename, "w") as f:
         json.dump({
             "theta0": theta0,
             "theta1": theta1,
             "mean_mileage": mean_mileage,
-            "range_mileage": range_mileage
+            "range_mileage": range_mileage,
+            "theta0_raw": theta0_raw,
+            "theta1_raw": theta1_raw
         }, f)
 
 

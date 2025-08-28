@@ -25,12 +25,39 @@ def load_model(filename):
 def load_data(filename):
     mileage = []
     price = []
-    with open(filename, "r") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            mileage.append(float(row["km"]))
-            price.append(float(row["price"]))
-    return mileage, price
+    try:
+        with open(filename, "r") as f:
+            reader = csv.DictReader(f)
+            if not {"km", "price"}.issubset(reader.fieldnames):
+                raise ValueError(
+                    "File data.csv must contain columns 'km' and 'price'.")
+
+            for row in reader:
+                try:
+                    mileage.append(float(row["km"]))
+                    price.append(float(row["price"]))
+                except (ValueError, KeyError) as e:
+                    print(f"Skipped row with invalid data: {row}. Error: {e}")
+                    continue
+
+        if not mileage or not price:
+            raise ValueError("File *.csv is empty or contains no valid data.")
+
+        if len(mileage) < 2:
+            raise ValueError("Insufficient data in *.csv for model training.")
+
+        if any(p <= 0 for p in price):
+            raise ValueError("Prices in *.csv file must be positive.")
+
+        if any(m < 0 for m in mileage):
+            raise ValueError("Mileage in *.csv file cannot be negative.")
+
+        return mileage, price
+
+    except FileNotFoundError:
+        raise FileNotFoundError("File *.csv not found.")
+    except Exception as e:
+        raise ValueError(f"Error reading *.csv file: {str(e)}")
 
 
 def normalize(value, mean, range_val):
@@ -95,9 +122,10 @@ if __name__ == "__main__":
         range_m
     )
 
-    print(f"Estimated price: {predicted_price}")
+    predicted_price = max(predicted_price, 1)
 
-    # Graph
+    print(f"Estimated price: {predicted_price:.0f}")
+
     mileage, price = load_data(DATA_FILE)
     plot_prediction(
         mileage,

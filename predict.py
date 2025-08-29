@@ -110,6 +110,9 @@ if __name__ == "__main__":
 
     try:
         mileage_input = float(input("🦄 Enter mileage: "))
+        if mileage_input < 0:
+            print("Mileage cannot be negative. Please enter a positive number.")
+            exit(1)
     except ValueError:
         print("Invalid input. Please enter a number.")
         exit(1)

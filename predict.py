@@ -109,7 +109,7 @@ if __name__ == "__main__":
     theta0, theta1, mean_m, range_m = load_model(THETA_FILE)
 
     try:
-        mileage_input = float(input("Enter mileage: "))
+        mileage_input = float(input("🦄 Enter mileage: "))
     except ValueError:
         print("Invalid input. Please enter a number.")
         exit(1)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     # predicted_price = max(predicted_price, 1) 🌟
 
-    print(f"Estimated price: {predicted_price:.0f}")
+    print(f"🐬 Estimated price: {predicted_price:.0f} 🐬")
 
     mileage, price = load_data(DATA_FILE)
     plot_prediction(

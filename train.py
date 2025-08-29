@@ -152,9 +152,9 @@ if __name__ == "__main__":
 
     save_model(theta0, theta1, mean_m, range_m, THETA_FILE)
 
-    print(f"Training completed: theta0 = {theta0}, theta1 = {theta1}")
+    print(f"👑 Training completed:\n✨ theta0 = {theta0},\n✨ theta1 = {theta1}")
     print(
-        f"Model R² score: "
+        f"✨ Model R² score: "
         f"{calculate_r2(mileage, price, theta0, theta1, mean_m, range_m):.4f}"
     )
 

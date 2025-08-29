@@ -122,7 +122,7 @@ if __name__ == "__main__":
         range_m
     )
 
-    predicted_price = max(predicted_price, 1)
+    # predicted_price = max(predicted_price, 1) 🌟
 
     print(f"Estimated price: {predicted_price:.0f}")
 

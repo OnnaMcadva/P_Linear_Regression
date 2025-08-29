@@ -18,7 +18,7 @@ def load_data(filename):
             reader = csv.DictReader(f)
             if not {"km", "price"}.issubset(reader.fieldnames):
                 raise ValueError(
-                    "File data.csv must contain columns 'km' and 'price'.")
+                    "File *.csv must contain columns 'km' and 'price'.")
 
             for row in reader:
                 try:

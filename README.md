@@ -58,10 +58,6 @@ P_Linear_Regression/
 
 This project is intended for learning and self-study. Contributions are welcome if you want to improve explanations, add more examples, or suggest enhancements.
 
-## License
-
-This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Acknowledgements
 
 - Inspired by various open educational resources on machine learning and statistics.
